@@ -13,12 +13,6 @@ namespace SimpleDY
 
         _EWFactors _neutralCurrentFactors(int iFlavour, double m_sq)
         {
-            static constexpr double s_W_sq  = 0.23126;
-            static constexpr double c_W_sq  = 1.0 - s_W_sq;
-            static constexpr double m_Z     = 91.1876;   
-            static constexpr double gamma_Z = 2.4952;    
-            static constexpr double kappa   = 1.0 / (4.0 * s_W_sq * c_W_sq);
-
             // charged lepton axial and vector couplings
             static constexpr double a_l = -0.5;
             static constexpr double v_l = -0.5 + 2.0 * s_W_sq;

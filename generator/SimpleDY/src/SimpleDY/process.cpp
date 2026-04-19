@@ -7,7 +7,7 @@
 namespace SimpleDY
 {
     static constexpr int nTrialEvents = 10e4;
-    static constexpr int nAcceptedEvents = 10e4;
+    static constexpr int nAcceptedEvents = 10e3;
     static constexpr double securityFactor = 1.2;
     
     namespace
@@ -62,7 +62,7 @@ namespace SimpleDY
             m_nEventTrials++;
         }
 
-        std::cout << "Event Trials: " << m_nEventTrials << std::endl;
+        std::cout << "Acceptance ratio: " << double(nAcceptedEvents) / m_nEventTrials << std::endl;
         
         _computeTotalCrossSection();
         
@@ -90,8 +90,11 @@ namespace SimpleDY
         event.y_max = std::log(m_sqrtS / event.m);
         event.y = rand(-event.y_max, event.y_max);
 
-        event.cos_th = rand(-1, 1);
         event.phi = rand(0, 2*PI);
+
+        // Sample cos(theta) from p(c) = 3(1+c^2)/8
+        double u = rand(0.0, 1.0);
+        event.cos_th = 2.0 * std::sinh(std::asinh(4.0 * u - 2.0) / 3.0);
 
         event.x1 = (event.m / m_sqrtS) * std::exp(event.y);
         event.x2 = (event.m / m_sqrtS) * std::exp(-event.y);
@@ -106,7 +109,8 @@ namespace SimpleDY
         double dsigma = computeDSigma(event, m_sqrtS, m_pdfs);
         
         // The inverse sampling factor
-        double p_inv = 8.0*PI * (m_mMax-m_mMin) * event.y_max;            
+        double p_cos = 3.0 / 8.0 * (1.0 + event.cos_th * event.cos_th);
+        double p_inv = 2.0 * PI * (m_mMax-m_mMin) * 2.0 * event.y_max / p_cos;            
         
         return dsigma * p_inv;
     }
