@@ -18,9 +18,11 @@ if __name__ == '__main__':
 
     weight_sum = sum(weight_values)
     weight_values = [w/weight_sum for w in weight_values]
-    
+
+    bin_count = 20
+
     plt.figure()
-    plt.hist(m_values, weights=weight_values)
+    plt.hist(m_values, weights=weight_values, bins=[20 + (120 - 20) / (bin_count + 1) * i for i in range(bin_count + 1)])
     plt.savefig('/home/julian/documents/uni/master/master_thesis/learning/simple_drell_yan/plot/m_hist.pdf')
 
     plt.figure()
@@ -31,7 +33,6 @@ if __name__ == '__main__':
     plt.hist(y_values, weights=weight_values)
     plt.savefig('/home/julian/documents/uni/master/master_thesis/learning/simple_drell_yan/plot/y_hist.pdf')
 
-    bin_count = 20
     plt.figure()
     plt.hist(cos_th_values, weights=weight_values, bins=[-1 + 2 / (bin_count + 1) * i for i in range(bin_count + 1)])
     plt.savefig('/home/julian/documents/uni/master/master_thesis/learning/simple_drell_yan/plot/cos_th_hist.pdf')

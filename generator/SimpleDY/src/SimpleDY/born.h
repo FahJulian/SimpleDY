@@ -1,18 +1,16 @@
 #pragma once
 
+#include "base.h"
+#include "event.h"
+
+#include <memory>
+#include <vector>
+
+#include <LHAPDF/LHAPDF.h>
+
 namespace SimpleDY
 {
-    struct FourMomentum
-    {
-        double e, x, y, z;
-    };
+    double computeBornKernel(const Event& event, const std::unique_ptr<LHAPDF::PDF>& pdf);
+    double computeSigma(const std::vector<Event>& events);
 
-    struct Event
-    {
-        double m, s, y, cos_th, phi, x1, x2, y_max;
-        FourMomentum p1, p2;
-        double weight;
-    };
-
-    void doStuff();
-}
+} // namespace SimpleDY

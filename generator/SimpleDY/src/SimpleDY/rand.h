@@ -1,5 +1,7 @@
 #pragma once
 
+#include "base.h"
+
 namespace SimpleDY
 {
     double rand();
