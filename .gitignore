@@ -1,0 +1,10 @@
+*.vscode*
+*Makefile*
+*events.csv
+*.dat
+*.info
+*.in
+lhapdf-config
+generator/build/generator
+stamp-h2
+.pw
