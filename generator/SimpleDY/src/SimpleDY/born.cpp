@@ -45,7 +45,7 @@ namespace SimpleDY
 
     } // namespace
 
-    double computeBornKernel(const Event& event, const std::unique_ptr<LHAPDF::PDF>& pdf)
+    double computeDSigma(const Event& event, double sqrtS, const std::unique_ptr<LHAPDF::PDF>& pdf)
     {
         double kernel = 0.0;
 
@@ -65,17 +65,8 @@ namespace SimpleDY
                     + Lminus * (2.0 * ew.H_F * event.cos_th);
         }
 
-        return kernel;
-    }
-
-    double computeSigma(const std::vector<Event>& events)
-    {
-        double sigma = 0.0;
-        for (const Event& event: events)
-            sigma += event.weight;
-        sigma /= events.size();
-
-        return sigma * GEV2_TO_MB;
+        double prefactor = ALPHA * ALPHA / 2.0 / NC / sqrtS / sqrtS / event.m;
+        return prefactor * kernel;
     }
 
 } // namespace SimpleDY

@@ -6,6 +6,10 @@
 
 namespace SimpleDY
 {
+    static constexpr int nTrialEvents = 10e4;
+    static constexpr int nAcceptedEvents = 10e4;
+    static constexpr double securityFactor = 1.2;
+    
     namespace
     {
         void _calcP(Event& event)
@@ -31,39 +35,38 @@ namespace SimpleDY
             return std::to_string(event.m) + ", " 
                 + std::to_string(event.s) + ", "
                 + std::to_string(event.y) + ", "
-                + std::to_string(event.cos_th) + ", "
-                + std::to_string(event.weight);
+                + std::to_string(event.cos_th);
         }
 
     } // namespace
     
-    void Process::init()
+    void Process::init(const std::string& pdfDataLocation, const std::string& pdfSet)
     {
-        LHAPDF::setPaths("/home/julian/documents/uni/master/master_thesis/learning/simple_drell_yan/data/lhapdf");
-        m_pdfs = std::unique_ptr<LHAPDF::PDF>(LHAPDF::mkPDF("NNPDF40_lo_as_01180", 0));
+        LHAPDF::setPaths(pdfDataLocation);
+        m_pdfs = std::unique_ptr<LHAPDF::PDF>(LHAPDF::mkPDF(pdfSet, 0));
     }
 
     void Process::run()
     {
-        for (int i = 0; i < 1000000; i++)
-        {   
-            Event event = _sampleNextEventKinematics();
-            
-            double prefactor = ALPHA * ALPHA / 2.0 / NC / m_sqrtS / m_sqrtS / event.m;
-            double kernel = computeBornKernel(event, m_pdfs);
-            
-            // dσ / dM dy dcosθ dφ
-            double dsigma = prefactor * kernel;
-            
-            // The inverse sampling factor
-            double p_inv = 8.0*PI * (m_mMax-m_mMin) * event.y_max;            
-            
-            event.weight = dsigma * p_inv;
-            
-            m_events.push_back(event);
-        }
+        _determineMaxWeight();
         
-        std::cout << "Total cross section: " << computeSigma(m_events) << " mb." << std::endl;
+        while (m_events.size() < nAcceptedEvents)
+        {
+            Event event = _sampleNextEventKinematics();
+            double weight = _computeEventWeight(event);
+        
+            double r = rand(0, 1);
+            if (r < weight / m_MaxWeight)
+                m_events.push_back(event); // accept event
+            
+            m_nEventTrials++;
+        }
+
+        std::cout << "Event Trials: " << m_nEventTrials << std::endl;
+        
+        _computeTotalCrossSection();
+        
+        std::cout << "Total cross section: " << m_TotalCrossSection  * GEV2_TO_MB << " mb." << std::endl;
     }
 
     void Process::writeToFile(const std::string& filePath)
@@ -96,6 +99,37 @@ namespace SimpleDY
         _calcP(event);
 
         return event;
+    }
+
+    double Process::_computeEventWeight(const Event& event)
+    {
+        double dsigma = computeDSigma(event, m_sqrtS, m_pdfs);
+        
+        // The inverse sampling factor
+        double p_inv = 8.0*PI * (m_mMax-m_mMin) * event.y_max;            
+        
+        return dsigma * p_inv;
+    }
+
+    void Process::_determineMaxWeight()
+    {
+        double maxWeight = 0.0;
+        
+        for (int i = 0; i < nTrialEvents; i++)
+        {   
+            Event event = _sampleNextEventKinematics();
+            double weight = _computeEventWeight(event);
+            
+            if (weight > maxWeight)
+                maxWeight = weight;
+        }
+
+        m_MaxWeight = securityFactor * maxWeight;
+    }
+
+    void Process::_computeTotalCrossSection()
+    {
+        m_TotalCrossSection = m_MaxWeight * nAcceptedEvents / m_nEventTrials;
     }
 
 } // namespace SimpleDY

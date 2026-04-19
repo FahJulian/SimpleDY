@@ -20,4 +20,5 @@ namespace SimpleDY
     private:
         std::string mFilePath;
     };
-}
+
+} // namespace SimpleDY

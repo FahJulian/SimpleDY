@@ -23,16 +23,22 @@ namespace SimpleDY
 
         ~Process() = default;
 
-        void init();
+        void init(const std::string& pdfDataLocation, const std::string& pdfSet);
         void run();
         void writeToFile(const std::string& filePath);
 
     private:
         Event _sampleNextEventKinematics();
+        double _computeEventWeight(const Event& event);
+        void _determineMaxWeight();
+        void _computeTotalCrossSection();
 
     private:
         const double m_sqrtS;   
         const double m_mMin, m_mMax;
+        int m_nEventTrials = 0;
+        double m_MaxWeight = 0.0;
+        double m_TotalCrossSection = 0.0;
 
         std::unique_ptr<LHAPDF::PDF> m_pdfs;
         std::vector<Event> m_events;
