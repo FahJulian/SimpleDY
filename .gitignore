@@ -4,6 +4,7 @@
 *.dat
 *.info
 *.in
+*.pdf
 lhapdf-config
 generator/build/generator
 stamp-h2
