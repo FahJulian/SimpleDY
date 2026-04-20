@@ -30,7 +30,7 @@ namespace SimpleDY
     private:
         void _clear();
         Event _sampleNextEventKinematics();
-        double _computeEventWeight(const Event& event);
+        double _computePInverse(const Event& event);
         void _determineMaxWeight();
         void _computeTotalCrossSection();
 

@@ -9,6 +9,12 @@
 
 namespace SimpleDY
 {
-    double computeDSigma(const Event& event, double sqrtS, const std::unique_ptr<LHAPDF::PDF>& pdf);
+    struct BornEvent
+    {
+        int iParton;
+        double dSigma;
+    };
+
+    BornEvent sampleBornEvent(const Event& event, double sqrtS, const std::unique_ptr<LHAPDF::PDF>& pdf);
 
 } // namespace SimpleDY

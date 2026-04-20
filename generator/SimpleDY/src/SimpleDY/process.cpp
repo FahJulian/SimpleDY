@@ -1,8 +1,11 @@
 #include "process.h"
 
+#include "isr.h"
 #include "rand.h"
 #include "born.h"
 #include "file.h"
+
+#include <iostream>
 
 namespace SimpleDY
 {
@@ -55,13 +58,27 @@ namespace SimpleDY
         while (m_events.size() < N_ACCEPTED_EVENTS)
         {
             Event event = _sampleNextEventKinematics();
-            double weight = _computeEventWeight(event);
+            BornEvent bornEvent = sampleBornEvent(event, m_sqrtS, m_pdfs);
+            event.iParton = bornEvent.iParton;
+
+            double weight = bornEvent.dSigma * _computePInverse(event);
         
             ASSERT(weight < m_MaxWeight, "Weight exceeds maximum weight.");
 
             double r = rand(0, 1);
             if (r < weight / m_MaxWeight)
+            {
+                auto emission = generateFirstISR(event, m_pdfs);
+                if (emission.hasValue())
+                {
+                    std::cout << "Generated emission with t = " << emission.getValue().t << " GeV^2 "
+                        << "and z = " << emission.getValue().z << "." << std::endl;
+                }
+                else 
+                    std::cout << "No emission generated." << std::endl;
+
                 m_events.push_back(event); // accept event
+            }
 
             m_nEventTrials++;
         }
@@ -117,15 +134,11 @@ namespace SimpleDY
         return event;
     }
 
-    double Process::_computeEventWeight(const Event& event)
+    // The inverse sampling factor
+    double Process::_computePInverse(const Event& event)
     {
-        double dsigma = computeDSigma(event, m_sqrtS, m_pdfs);
-        
-        // The inverse sampling factor
         double pCos = 3.0 / 8.0 * (1.0 + event.cosTh * event.cosTh);
-        double pInv = 2.0 * Math::PI * (m_mMax-m_mMin) * 2.0 * event.yMax / pCos;            
-        
-        return dsigma * pInv;
+        return 2.0 * Math::PI * (m_mMax-m_mMin) * 2.0 * event.yMax / pCos;            
     }
 
     void Process::_determineMaxWeight()
@@ -135,7 +148,9 @@ namespace SimpleDY
         for (int i = 0; i < N_TRIAL_EVENTS; i++)
         {   
             Event event = _sampleNextEventKinematics();
-            double weight = _computeEventWeight(event);
+            BornEvent bornEvent = sampleBornEvent(event, m_sqrtS, m_pdfs);
+
+            double weight = bornEvent.dSigma * _computePInverse(event);
             
             if (weight > maxWeight)
                 maxWeight = weight;

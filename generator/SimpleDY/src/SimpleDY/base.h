@@ -9,7 +9,7 @@ namespace SimpleDY
     namespace Math
     {
         static constexpr double PI = 3.14159265358979323846;
-        
+
     } // namespace Math
 
     namespace Physics
@@ -22,6 +22,7 @@ namespace SimpleDY
         static constexpr double M_Z     = 91.1876;   
         static constexpr double GAMMA_Z = 2.4952;    
         static constexpr double KAPPA   = 1.0 / (4.0 * S_W_SQ * C_W_SQ);
+        static constexpr double C_F = 4.0 / 3.0;
 
         // charged lepton axial and vector couplings
         static constexpr double A_L = -0.5;

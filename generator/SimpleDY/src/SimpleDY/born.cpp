@@ -1,5 +1,7 @@
 #include "born.h"
 
+#include "rand.h"
+
 #include <math.h>
 
 namespace SimpleDY
@@ -34,11 +36,21 @@ namespace SimpleDY
             return {hU, hF};
         }
 
+        struct __QuarkChannel
+        {
+            int iFlavour;
+            double weight;
+        };
+
     } // namespace
 
-    double computeDSigma(const Event& event, double sqrtS, const std::unique_ptr<LHAPDF::PDF>& pdf)
-    {
-        double kernel = 0.0;
+    BornEvent sampleBornEvent(const Event& event, double sqrtS, const std::unique_ptr<LHAPDF::PDF>& pdf)
+    {   
+        double prefactor = Physics::ALPHA * Physics::ALPHA / 2.0 / Physics::NC / sqrtS / sqrtS / event.m;
+        double weightTot = 0.0;
+
+        std::vector<__QuarkChannel> channels;
+        channels.reserve(10);
 
         for (int iFlavour = 1; iFlavour <= 5; iFlavour++)
         {
@@ -47,17 +59,33 @@ namespace SimpleDY
             double qb1 = pdf->xfxQ2(-iFlavour, event.x1, event.s) / event.x1;
             double q2  = pdf->xfxQ2( iFlavour, event.x2, event.s) / event.x2;
 
-            double Lplus  = q1 * qb2 + qb1 * q2;
-            double Lminus = q1 * qb2 - qb1 * q2;
-
             __EWFactors ew = __neutralCurrentFactors(iFlavour, event.s);
 
-            kernel += Lplus  * ew.hU * (1.0 + event.cosTh * event.cosTh)
-                    + Lminus * (2.0 * ew.hF * event.cosTh);
+            double c = event.cosTh;
+            double angPlus  = ew.hU * (1.0 + c * c) + 2.0 * ew.hF * c;
+            double angMinus = ew.hU * (1.0 + c * c) - 2.0 * ew.hF * c;
+
+            double weightPlus  = q1  * qb2 * angPlus;
+            double weightMinus = qb1 * q2  * angMinus;
+
+            channels.push_back({iFlavour, weightPlus});
+            channels.push_back({-iFlavour, weightMinus});
+
+            weightTot += weightPlus + weightMinus;
         }
 
-        double prefactor = Physics::ALPHA * Physics::ALPHA / 2.0 / Physics::NC / sqrtS / sqrtS / event.m;
-        return prefactor * kernel;
+        double u = rand(0.0, weightTot);
+        double cumulativeWeight = 0.0;
+
+        for (const auto& channel: channels)
+        {
+            cumulativeWeight += channel.weight;
+            if (u < cumulativeWeight)
+                return {channel.iFlavour, prefactor * weightTot};
+        }
+
+        ASSERT(false, "Something went wrong.");
+        return {};
     }
 
 } // namespace SimpleDY
