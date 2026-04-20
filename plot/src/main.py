@@ -1,33 +1,45 @@
 import matplotlib.pyplot as plt
 
-if __name__ == '__main__':
-    m_values = []
-    s_values = []
-    y_values = []
-    cos_th_values = []
-
-    with open('/home/julian/documents/uni/master/master_thesis/learning/simple_drell_yan/data/events/events.csv') as file:
+def extract_csv_cols(file_path, ncols):
+    data = [[] for _ in range(ncols)]
+    
+    with open(file_path, mode='r') as file:
         for line in file.readlines():
             cols = line.split(", ")
-            m_values.append(float(cols[0]))
-            s_values.append(float(cols[1]))
-            y_values.append(float(cols[2]))
-            cos_th_values.append(float(cols[3]))
+            for i in range(ncols):
+                data[i].append(float(cols[i]))
 
-    bin_count = 20
+    return data
 
+def plot_as_hist(data, file_path, nbins=None, data_range=None):
+    if (nbins is None and data_range is not None) or (nbins is not None and data_range is None):
+        assert False
+    
     plt.figure()
-    plt.hist(m_values, bins=[60 + (120 - 60) / (bin_count + 1) * i for i in range(bin_count + 1)])
-    plt.savefig('/home/julian/documents/uni/master/master_thesis/learning/simple_drell_yan/plot/m_hist.pdf')
+    if nbins is None:
+        plt.hist(data)
+    else:
+        plt.hist(data, bins = [data_range[0] + (data_range[1] - data_range[0]) / (nbins + 1) * i for i in range(nbins + 1)])
+    plt.savefig(file_path)
 
-    plt.figure()
-    plt.hist(s_values)
-    plt.savefig('/home/julian/documents/uni/master/master_thesis/learning/simple_drell_yan/plot/s_hist.pdf')
+if __name__ == '__main__':
+    (m_values, s_values, y_values, cos_th_values, pT_values) = extract_csv_cols(
+        '/home/julian/documents/uni/master/master_thesis/learning/simple_drell_yan/data/events/events.csv', 5)
 
-    plt.figure()
-    plt.hist(y_values)
-    plt.savefig('/home/julian/documents/uni/master/master_thesis/learning/simple_drell_yan/plot/y_hist.pdf')
+    plot_as_hist(
+        m_values, 
+        '/home/julian/documents/uni/master/master_thesis/learning/simple_drell_yan/plot/m_hist.pdf',
+        nbins=20,
+        data_range=(60, 120)
+    )
 
-    plt.figure()
-    plt.hist(cos_th_values, bins=[-1 + 2 / (bin_count + 1) * i for i in range(bin_count + 1)])
-    plt.savefig('/home/julian/documents/uni/master/master_thesis/learning/simple_drell_yan/plot/cos_th_hist.pdf')
+    plot_as_hist(
+        cos_th_values, 
+        '/home/julian/documents/uni/master/master_thesis/learning/simple_drell_yan/plot/cos_th_hist.pdf',
+        nbins=20,
+        data_range=(-1, 1)
+    )
+
+    plot_as_hist(s_values, '/home/julian/documents/uni/master/master_thesis/learning/simple_drell_yan/plot/s_hist.pdf')
+    plot_as_hist(y_values, '/home/julian/documents/uni/master/master_thesis/learning/simple_drell_yan/plot/y_hist.pdf')
+    plot_as_hist(pT_values, '/home/julian/documents/uni/master/master_thesis/learning/simple_drell_yan/plot/first_em_pT_hist.pdf')
