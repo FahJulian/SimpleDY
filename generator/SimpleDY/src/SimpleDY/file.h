@@ -18,7 +18,7 @@ namespace SimpleDY
         void write(const std::string& text);
 
     private:
-        std::string mFilePath;
+        std::string m_filePath;
     };
 
 } // namespace SimpleDY

@@ -28,6 +28,7 @@ namespace SimpleDY
         void writeToFile(const std::string& filePath);
 
     private:
+        void _clear();
         Event _sampleNextEventKinematics();
         double _computeEventWeight(const Event& event);
         void _determineMaxWeight();

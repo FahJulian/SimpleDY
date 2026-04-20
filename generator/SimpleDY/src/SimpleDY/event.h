@@ -6,7 +6,7 @@ namespace SimpleDY
 {
     struct Event
     {
-        double m, s, y, cos_th, phi, x1, x2, y_max;
+        double m, s, y, cosTh, phi, x1, x2, yMax;
         FourMomentum p1, p2;
     };
     

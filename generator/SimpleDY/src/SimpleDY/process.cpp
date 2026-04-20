@@ -6,36 +6,36 @@
 
 namespace SimpleDY
 {
-    static constexpr int nTrialEvents = 10e4;
-    static constexpr int nAcceptedEvents = 10e3;
-    static constexpr double securityFactor = 1.2;
+    static constexpr int N_TRIAL_EVENTS = 10e4;
+    static constexpr int N_ACCEPTED_EVENTS = 10e3;
+    static constexpr double SECURITY_FACTOR = 1.1;
     
     namespace
     {
-        void _calcP(Event& event)
+        void __calcP(Event& event)
         {
-            auto sin_th = std::sin(std::acos(event.cos_th));
+            double sinTh = std::sqrt(1.0 - event.cosTh * event.cosTh);
 
             double e = event.m / 2;
-            double pz = event.m / 2. * event.cos_th;
+            double pz = event.m / 2. * event.cosTh;
 
             event.p1.e = e * std::cosh(event.y) + pz * std::sinh(event.y);
-            event.p1.x = event.m / 2. * sin_th * std::cos(event.phi);
-            event.p1.y = event.m / 2. * sin_th * std::sin(event.phi);
+            event.p1.x = event.m / 2. * sinTh * std::cos(event.phi);
+            event.p1.y = event.m / 2. * sinTh * std::sin(event.phi);
             event.p1.z = e * std::sinh(event.y) + pz * std::cosh(event.y);
 
             event.p2.e = e * std::cosh(event.y) - pz * std::sinh(event.y);
-            event.p2.x = - event.m / 2. * sin_th * std::cos(event.phi);
-            event.p2.y = - event.m / 2. * sin_th * std::sin(event.phi);
+            event.p2.x = - event.m / 2. * sinTh * std::cos(event.phi);
+            event.p2.y = - event.m / 2. * sinTh * std::sin(event.phi);
             event.p2.z = e * std::sinh(event.y) - pz * std::cosh(event.y);
         }
 
-        std::string _toString(const Event& event)
+        std::string __toString(const Event& event)
         {
             return std::to_string(event.m) + ", " 
                 + std::to_string(event.s) + ", "
                 + std::to_string(event.y) + ", "
-                + std::to_string(event.cos_th);
+                + std::to_string(event.cosTh);
         }
 
     } // namespace
@@ -48,25 +48,29 @@ namespace SimpleDY
 
     void Process::run()
     {
+        _clear();
+
         _determineMaxWeight();
         
-        while (m_events.size() < nAcceptedEvents)
+        while (m_events.size() < N_ACCEPTED_EVENTS)
         {
             Event event = _sampleNextEventKinematics();
             double weight = _computeEventWeight(event);
         
+            ASSERT(weight < m_MaxWeight, "Weight exceeds maximum weight.");
+
             double r = rand(0, 1);
             if (r < weight / m_MaxWeight)
                 m_events.push_back(event); // accept event
-            
+
             m_nEventTrials++;
         }
 
-        std::cout << "Acceptance ratio: " << double(nAcceptedEvents) / m_nEventTrials << std::endl;
+        std::cout << "Acceptance ratio: " << double(N_ACCEPTED_EVENTS) / m_nEventTrials << std::endl;
         
         _computeTotalCrossSection();
         
-        std::cout << "Total cross section: " << m_TotalCrossSection  * GEV2_TO_MB << " mb." << std::endl;
+        std::cout << "Total cross section: " << m_TotalCrossSection  * Physics::GEV2_TO_MB << " mb." << std::endl;
     }
 
     void Process::writeToFile(const std::string& filePath)
@@ -74,10 +78,19 @@ namespace SimpleDY
         std::string fileContent;
             
         for (const Event& event: m_events)
-            fileContent.append(_toString(event) + '\n');
+            fileContent.append(__toString(event) + '\n');
         
         File file = File(filePath);
         file.write(fileContent);
+    }
+
+    void Process::_clear()
+    {
+        m_events.clear();
+        m_events.reserve(N_ACCEPTED_EVENTS);
+        m_nEventTrials = 0;
+        m_TotalCrossSection = 0.0;
+        m_MaxWeight = 0.0;
     }
 
     Event Process::_sampleNextEventKinematics()
@@ -87,19 +100,19 @@ namespace SimpleDY
         event.m = rand(m_mMin, m_mMax);
         event.s = event.m*event.m;
         
-        event.y_max = std::log(m_sqrtS / event.m);
-        event.y = rand(-event.y_max, event.y_max);
+        event.yMax = std::log(m_sqrtS / event.m);
+        event.y = rand(-event.yMax, event.yMax);
 
-        event.phi = rand(0, 2*PI);
+        event.phi = rand(0, 2*Math::PI);
 
         // Sample cos(theta) from p(c) = 3(1+c^2)/8
         double u = rand(0.0, 1.0);
-        event.cos_th = 2.0 * std::sinh(std::asinh(4.0 * u - 2.0) / 3.0);
+        event.cosTh = 2.0 * std::sinh(std::asinh(4.0 * u - 2.0) / 3.0);
 
         event.x1 = (event.m / m_sqrtS) * std::exp(event.y);
         event.x2 = (event.m / m_sqrtS) * std::exp(-event.y);
 
-        _calcP(event);
+        __calcP(event);
 
         return event;
     }
@@ -109,17 +122,17 @@ namespace SimpleDY
         double dsigma = computeDSigma(event, m_sqrtS, m_pdfs);
         
         // The inverse sampling factor
-        double p_cos = 3.0 / 8.0 * (1.0 + event.cos_th * event.cos_th);
-        double p_inv = 2.0 * PI * (m_mMax-m_mMin) * 2.0 * event.y_max / p_cos;            
+        double pCos = 3.0 / 8.0 * (1.0 + event.cosTh * event.cosTh);
+        double pInv = 2.0 * Math::PI * (m_mMax-m_mMin) * 2.0 * event.yMax / pCos;            
         
-        return dsigma * p_inv;
+        return dsigma * pInv;
     }
 
     void Process::_determineMaxWeight()
     {
         double maxWeight = 0.0;
         
-        for (int i = 0; i < nTrialEvents; i++)
+        for (int i = 0; i < N_TRIAL_EVENTS; i++)
         {   
             Event event = _sampleNextEventKinematics();
             double weight = _computeEventWeight(event);
@@ -128,12 +141,12 @@ namespace SimpleDY
                 maxWeight = weight;
         }
 
-        m_MaxWeight = securityFactor * maxWeight;
+        m_MaxWeight = SECURITY_FACTOR * maxWeight;
     }
 
     void Process::_computeTotalCrossSection()
     {
-        m_TotalCrossSection = m_MaxWeight * nAcceptedEvents / m_nEventTrials;
+        m_TotalCrossSection = m_MaxWeight * N_ACCEPTED_EVENTS / m_nEventTrials;
     }
 
 } // namespace SimpleDY

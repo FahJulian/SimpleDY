@@ -17,7 +17,7 @@ if __name__ == '__main__':
     bin_count = 20
 
     plt.figure()
-    plt.hist(m_values, bins=[20 + (120 - 20) / (bin_count + 1) * i for i in range(bin_count + 1)])
+    plt.hist(m_values, bins=[60 + (120 - 60) / (bin_count + 1) * i for i in range(bin_count + 1)])
     plt.savefig('/home/julian/documents/uni/master/master_thesis/learning/simple_drell_yan/plot/m_hist.pdf')
 
     plt.figure()

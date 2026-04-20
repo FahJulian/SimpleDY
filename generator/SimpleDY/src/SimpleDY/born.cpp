@@ -6,35 +6,32 @@ namespace SimpleDY
 {   
     namespace
     {
-        struct _EWFactors
+        struct __EWFactors
         {
-            double H_U, H_F;
+            double hU, hF;
         };
 
-        _EWFactors _neutralCurrentFactors(int iFlavour, double m_sq)
+        __EWFactors __neutralCurrentFactors(int iFlavour, double m_sq)
         {
-            // charged lepton axial and vector couplings
-            static constexpr double a_l = -0.5;
-            static constexpr double v_l = -0.5 + 2.0 * s_W_sq;
-
             // quark charge and axial and vector couplings
-            double q_q = (iFlavour % 2 == 0) ? 2.0 /3.0 : -1.0 / 3.0;
-            double a_q = (iFlavour % 2 == 0) ? 0.5 : -0.5;
-            double v_q = (iFlavour % 2 == 0) ? 0.5 - (4.0 / 3.0) * s_W_sq : -0.5 + (2.0 / 3.0) * s_W_sq;
+            double qQ = (iFlavour % 2 == 0) ? 2.0 /3.0 : -1.0 / 3.0;
+            double aQ = (iFlavour % 2 == 0) ? 0.5 : -0.5;
+            double vQ = (iFlavour % 2 == 0) ? 0.5 - (4.0 / 3.0) * Physics::S_W_SQ : -0.5 + (2.0 / 3.0) * Physics::S_W_SQ;
 
-            double D_Z = (m_sq - m_Z * m_Z) * (m_sq - m_Z * m_Z) + m_Z * m_Z * gamma_Z * gamma_Z;
+            double dZ = (m_sq - Physics::M_Z * Physics::M_Z) * (m_sq - Physics::M_Z * Physics::M_Z) 
+                + Physics::M_Z * Physics::M_Z * Physics::GAMMA_Z * Physics::GAMMA_Z;
 
-            double Re_chi   = kappa * m_sq * (m_sq - m_Z * m_Z) / D_Z;
-            double abs_chi_sq = kappa * kappa * m_sq * m_sq / D_Z;
+            double ReChi   = Physics::KAPPA * m_sq * (m_sq - Physics::M_Z * Physics::M_Z) / dZ;
+            double AbsChiSq = Physics::KAPPA * Physics::KAPPA * m_sq * m_sq / dZ;
 
-            double H_U = q_q * q_q
-                    - 2.0 * q_q * v_l * v_q * Re_chi
-                    + (v_l * v_l + a_l * a_l) * (v_q * v_q + a_q * a_q) * abs_chi_sq;
+            double hU = qQ * qQ
+                    - 2.0 * qQ * Physics::V_L * vQ * ReChi
+                    + (Physics::V_L * Physics::V_L + Physics::A_L * Physics::A_L) * (vQ * vQ + aQ * aQ) * AbsChiSq;
 
-            double H_F = -2.0 * q_q * a_l * a_q * Re_chi
-                    + 4.0 * v_l * a_l * v_q * a_q * abs_chi_sq;
+            double hF = -2.0 * qQ * Physics::A_L * aQ * ReChi
+                    + 4.0 * Physics::V_L * Physics::A_L * vQ * aQ * AbsChiSq;
 
-            return {H_U, H_F};
+            return {hU, hF};
         }
 
     } // namespace
@@ -53,13 +50,13 @@ namespace SimpleDY
             double Lplus  = q1 * qb2 + qb1 * q2;
             double Lminus = q1 * qb2 - qb1 * q2;
 
-            _EWFactors ew = _neutralCurrentFactors(iFlavour, event.s);
+            __EWFactors ew = __neutralCurrentFactors(iFlavour, event.s);
 
-            kernel += Lplus  * ew.H_U * (1.0 + event.cos_th * event.cos_th)
-                    + Lminus * (2.0 * ew.H_F * event.cos_th);
+            kernel += Lplus  * ew.hU * (1.0 + event.cosTh * event.cosTh)
+                    + Lminus * (2.0 * ew.hF * event.cosTh);
         }
 
-        double prefactor = ALPHA * ALPHA / 2.0 / NC / sqrtS / sqrtS / event.m;
+        double prefactor = Physics::ALPHA * Physics::ALPHA / 2.0 / Physics::NC / sqrtS / sqrtS / event.m;
         return prefactor * kernel;
     }
 

@@ -6,13 +6,13 @@
 namespace SimpleDY
 {
     File::File(const std::string& filePath)
-        : mFilePath(filePath)
+        : m_filePath(filePath)
     {
     }
 
     std::string File::read() const
     {
-        std::ifstream stream = std::ifstream(mFilePath.c_str());
+        std::ifstream stream = std::ifstream(m_filePath.c_str());
 
         std::stringstream buffer;
         buffer << stream.rdbuf();
@@ -31,10 +31,11 @@ namespace SimpleDY
 
     void File::write(const std::string& text)
     {
-        std::ofstream stream = std::ofstream(mFilePath.c_str());
+        std::ofstream stream = std::ofstream(m_filePath.c_str());
 
         stream << text;
 
         stream.close();
     }
-}
+    
+} // namespace SimpleDY

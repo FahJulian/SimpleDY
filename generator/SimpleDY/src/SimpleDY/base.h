@@ -1,16 +1,33 @@
 #pragma once
 
+#include <stdexcept>
+
+#define ASSERT(cond, msg) if (!(cond)) throw std::runtime_error(msg);
+
 namespace SimpleDY
 {
-    static constexpr double PI = 3.14159265358979323846;
-    static constexpr double ALPHA = 1.0 / 137.035999084;
-    static constexpr double NC = 3.0;
-    static constexpr double GEV2_TO_MB = 0.389379338;
-    static constexpr double s_W_sq  = 0.23126;
-    static constexpr double c_W_sq  = 1.0 - s_W_sq;
-    static constexpr double m_Z     = 91.1876;   
-    static constexpr double gamma_Z = 2.4952;    
-    static constexpr double kappa   = 1.0 / (4.0 * s_W_sq * c_W_sq);
+    namespace Math
+    {
+        static constexpr double PI = 3.14159265358979323846;
+        
+    } // namespace Math
+
+    namespace Physics
+    {
+        static constexpr double ALPHA = 1.0 / 137.035999084;
+        static constexpr double NC = 3.0;
+        static constexpr double GEV2_TO_MB = 0.389379338;
+        static constexpr double S_W_SQ  = 0.23126;
+        static constexpr double C_W_SQ  = 1.0 - S_W_SQ;
+        static constexpr double M_Z     = 91.1876;   
+        static constexpr double GAMMA_Z = 2.4952;    
+        static constexpr double KAPPA   = 1.0 / (4.0 * S_W_SQ * C_W_SQ);
+
+        // charged lepton axial and vector couplings
+        static constexpr double A_L = -0.5;
+        static constexpr double V_L = -0.5 + 2.0 * S_W_SQ;
+
+    } // namespace Physics
     
     struct FourMomentum
     {
