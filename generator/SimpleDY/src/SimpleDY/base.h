@@ -22,6 +22,7 @@ namespace SimpleDY
         static constexpr double M_Z     = 91.1876;   
         static constexpr double GAMMA_Z = 2.4952;    
         static constexpr double KAPPA   = 1.0 / (4.0 * S_W_SQ * C_W_SQ);
+        static constexpr double LAMBDA_SQ_QCD = 0.2*0.2;
         static constexpr double C_F = 4.0 / 3.0;
 
         // charged lepton axial and vector couplings
@@ -29,10 +30,5 @@ namespace SimpleDY
         static constexpr double V_L = -0.5 + 2.0 * S_W_SQ;
 
     } // namespace Physics
-    
-    struct FourMomentum
-    {
-        double e, x, y, z;
-    };
 
 } // namespace SimpleDY

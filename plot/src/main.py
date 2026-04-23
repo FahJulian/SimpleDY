@@ -23,8 +23,8 @@ def plot_as_hist(data, file_path, nbins=None, data_range=None):
     plt.savefig(file_path)
 
 if __name__ == '__main__':
-    (m_values, s_values, y_values, cos_th_values, pT_values) = extract_csv_cols(
-        '/home/julian/documents/uni/master/master_thesis/learning/simple_drell_yan/data/events/events.csv', 5)
+    (m_values, cos_th_values, pT_values) = extract_csv_cols(
+        '/home/julian/documents/uni/master/master_thesis/learning/simple_drell_yan/data/events/events.csv', 3)
 
     plot_as_hist(
         m_values, 
@@ -40,6 +40,6 @@ if __name__ == '__main__':
         data_range=(-1, 1)
     )
 
-    plot_as_hist(s_values, '/home/julian/documents/uni/master/master_thesis/learning/simple_drell_yan/plot/s_hist.pdf')
-    plot_as_hist(y_values, '/home/julian/documents/uni/master/master_thesis/learning/simple_drell_yan/plot/y_hist.pdf')
+    # plot_as_hist(s_values, '/home/julian/documents/uni/master/master_thesis/learning/simple_drell_yan/plot/s_hist.pdf')
+    # plot_as_hist(y_values, '/home/julian/documents/uni/master/master_thesis/learning/simple_drell_yan/plot/y_hist.pdf')
     plot_as_hist(pT_values, '/home/julian/documents/uni/master/master_thesis/learning/simple_drell_yan/plot/first_em_pT_hist.pdf')
