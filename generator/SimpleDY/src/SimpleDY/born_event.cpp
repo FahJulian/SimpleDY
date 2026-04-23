@@ -108,7 +108,7 @@ namespace SimpleDY
             double fb2 = m_process.getPdfs()->xfxQ2(-partonId, m_x1, mSq) / m_x1;
 
             // Compute the couplings 
-            bool upType = partonId & 2 == 0;
+            bool upType = partonId % 2 == 0;
             auto [c1, c2] = __neutralCurrentCouplings(upType, mSq);
 
             // Compute the weight if the quark is in leg 1 or leg 2, respectively

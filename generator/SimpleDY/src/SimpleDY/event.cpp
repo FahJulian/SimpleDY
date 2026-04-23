@@ -108,8 +108,9 @@ namespace SimpleDY
     {
         FourVector totalIn = m_p1In + m_p2In;
         FourVector totalOut = m_p1Out + m_p2Out + m_pGluon;
+        double mismatch = (totalIn - totalOut) * (totalIn - totalOut) / m_bornEvent.getS();
 
-        return (totalIn - totalOut) * (totalIn - totalOut) / m_bornEvent.getS() < __ALLOWED_KINEMATIC_MISMATCH;
+        return std::abs(mismatch) < __ALLOWED_KINEMATIC_MISMATCH;
     }
 
 } // namespace SimpleDY
