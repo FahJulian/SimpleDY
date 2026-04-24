@@ -9,7 +9,6 @@ namespace SimpleDY
 {
     namespace
     {
-        // TODO: This still looks ugly
         std::tuple<double, double> __neutralCurrentCouplings(bool upType, double mSq)
         {
             // quark charge and axial and vector couplings

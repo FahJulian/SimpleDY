@@ -10,7 +10,7 @@ namespace SimpleDY
 {
     namespace 
     {
-        static constexpr double __DELTA = 1.0e-4;
+        static constexpr double __DELTA = 1.0e-6;
         static constexpr double __T_CUTOFF = 2;   // GeV^2
         static constexpr double __B = 1.5;
 
@@ -68,8 +68,8 @@ namespace SimpleDY
 
         double x = leg == 1 ? bornEvent.getX1() : bornEvent.getX2();
 
-        // Determine the kinematic bounds on z
-        // TODO: Figure out a more sensible zMax
+        // Determine the kinematic bounds on z: The upper bound is t-dependent, so we use no 
+        // upper bound at first and then veto if the bound is exceeded
         double zMin = x;
         double zMax = 1.0 - __DELTA;
 
@@ -97,7 +97,9 @@ namespace SimpleDY
 
             // If the kinematics are allowed, accept the emission with the ratio just computed, 
             // else try another emission at the lower scale
-            if (emission.m_z < 1.0 - emission.m_t / bornEvent.getS() && rand(0.0, 1.0) < rAcc)
+            double r = emission.m_t / bornEvent.getS();
+            double zMaxPhys = std::pow(std::sqrt(1 + r) - std::sqrt(r), 2);
+            if (emission.m_z < zMaxPhys && rand(0.0, 1.0) < rAcc)
                 return emission;
             else 
                 tMax = emission.m_t;
