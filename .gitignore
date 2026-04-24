@@ -9,3 +9,5 @@ lhapdf-config
 generator/build/generator
 stamp-h2
 .pw
+pythia/
+*.lhe

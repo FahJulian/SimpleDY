@@ -34,20 +34,12 @@ namespace SimpleDY
             return 1.0 - (1.0 - zMin) * exp(-u * normZ);
         }
 
-        double __alphaSOneLoop(double qSq, int nF)
-        {
-            ASSERT (qSq > Physics::LAMBDA_SQ_QCD, "Invalid Scale");
-
-            double beta0 = 11.0 - 2.0 / 3.0 * nF;
-            return 4.0 * Math::PI / beta0 / std::log(qSq / Physics::LAMBDA_SQ_QCD);
-        }
-
         // Compute the franction of events with the given kinematics to accept
         double __computeAcceptanceRatio(double t, double z, double x, int partonId, 
             const std::unique_ptr<LHAPDF::PDF>& pdf)
         {
             double pdfRatio = pdf->xfxQ2(partonId, x / z, t) / pdf->xfxQ2(partonId, x, t);
-            double prefactor = __alphaSOneLoop(t, 5) / 2 / Math::PI * Physics::C_F / __B;
+            double prefactor = Physics::alphaSOneLoop(t, 5) / 2 / Math::PI * Physics::C_F / __B;
             
             return prefactor * (1 + z * z) * pdfRatio;
         }

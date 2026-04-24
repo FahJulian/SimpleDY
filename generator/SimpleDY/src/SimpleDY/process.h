@@ -30,6 +30,8 @@ namespace SimpleDY
         double getMMin() const { return m_mMin; }
         double getMMax() const { return m_mMax; }
         double getSqrtS() const { return m_sqrtS; }
+        double getSigma() const { return m_totalCrossSection; }
+        auto getEvents() const { return m_events; }
         const std::unique_ptr<LHAPDF::PDF>& getPdfs() const { return m_pdfs; }
 
     private:
@@ -42,7 +44,7 @@ namespace SimpleDY
         const double m_mMin, m_mMax;
         int m_nEventTrials = 0;
         double m_maxDSigma = 0.0;
-        double m_totalCrossSection = 0.0;
+        double m_totalCrossSection = 0.0;   // pb
 
         std::unique_ptr<LHAPDF::PDF> m_pdfs;
         std::vector<Event> m_events;

@@ -4,6 +4,7 @@
 #include "SimpleDY/file.h"
 #include "SimpleDY/emission.h"
 #include "SimpleDY/born_event.h"
+#include "SimpleDY/les_houches_serializer.h"
 
 #include <iostream>
 
@@ -54,18 +55,20 @@ namespace SimpleDY
         
         _computeTotalCrossSection();
         
-        std::cout << "Total cross section: " << m_totalCrossSection  * Physics::GEV2_TO_MB << " mb." << std::endl;
+        std::cout << "Total cross section: " << m_totalCrossSection << " pb." << std::endl;
     }
 
     void Process::writeToFile(const std::string& filePath) const
     {
-        std::string fileContent;
+        // std::string fileContent;
             
-        for (const auto& event : m_events)
-            fileContent.append(event.toString() + '\n');
+        // for (const auto& event : m_events)
+        //     fileContent.append(event.toString() + '\n');
         
-        File file = File(filePath);
-        file.write(fileContent);
+        // File file = File(filePath);
+        // file.write(fileContent);
+
+        LesHouchesSerializer(*this).serialize(filePath);
     }
 
     void Process::_clear()
@@ -96,7 +99,7 @@ namespace SimpleDY
 
     void Process::_computeTotalCrossSection()
     {
-        m_totalCrossSection = m_maxDSigma * __N_ACCEPTED_EVENTS / m_nEventTrials;
+        m_totalCrossSection = m_maxDSigma * __N_ACCEPTED_EVENTS / m_nEventTrials * Physics::GEV2_TO_PB;
     }
 
 } // namespace SimpleDY

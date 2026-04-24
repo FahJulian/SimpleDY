@@ -1,5 +1,6 @@
 #pragma once
 
+#include <math.h>
 #include <stdexcept>
 
 #define ASSERT(cond, msg) if (!(cond)) throw std::runtime_error(msg);
@@ -16,7 +17,7 @@ namespace SimpleDY
     {
         static constexpr double ALPHA = 1.0 / 137.035999084;
         static constexpr double NC = 3.0;
-        static constexpr double GEV2_TO_MB = 0.389379338;
+        static constexpr double GEV2_TO_PB = 0.389379338e9;
         static constexpr double S_W_SQ  = 0.23126;
         static constexpr double C_W_SQ  = 1.0 - S_W_SQ;
         static constexpr double M_Z     = 91.1876;   
@@ -28,6 +29,14 @@ namespace SimpleDY
         // charged lepton axial and vector couplings
         static constexpr double A_L = -0.5;
         static constexpr double V_L = -0.5 + 2.0 * S_W_SQ;
+
+        inline double alphaSOneLoop(double qSq, int nF)
+        {
+            ASSERT (qSq > LAMBDA_SQ_QCD, "Invalid Scale");
+
+            double beta0 = 11.0 - 2.0 / 3.0 * nF;
+            return 4.0 * Math::PI / beta0 / std::log(qSq / LAMBDA_SQ_QCD);
+        }
 
     } // namespace Physics
 

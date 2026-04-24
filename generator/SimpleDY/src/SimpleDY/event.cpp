@@ -74,7 +74,7 @@ namespace SimpleDY
         FourVector sum = m_p1Out + m_p2Out;
         double pT = std::sqrt(sum.pX*sum.pX + sum.pY*sum.pY);
 
-        return std::to_string(m_bornEvent.getM()) + ", "
+        return std::to_string(m_bornEvent.getMBoson()) + ", "
             + std::to_string(m_bornEvent.getCosTh()) + ", "
             + std::to_string(pT);
     }
@@ -82,7 +82,7 @@ namespace SimpleDY
     std::optional<double> Event::_calculateBosonRapidity(double x1PreEm, double x2PreEm, double mT) const
     {
         if (m_emission.isRejected())
-            return m_bornEvent.getY();
+            return m_bornEvent.getYBoson();
 
         double a = x1PreEm * m_process.getSqrtS();
         double b = x2PreEm * m_process.getSqrtS();
@@ -101,7 +101,7 @@ namespace SimpleDY
         double y2 = std::log(u2);
 
         // pick the solution closer to the underlying Born rapidity
-        return (std::abs(y1 - m_bornEvent.getY()) < std::abs(y2 - m_bornEvent.getY())) ? y1 : y2;
+        return (std::abs(y1 - m_bornEvent.getYBoson()) < std::abs(y2 - m_bornEvent.getYBoson())) ? y1 : y2;
     }
 
     bool Event::_hasValidKinematics() const

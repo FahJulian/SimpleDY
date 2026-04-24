@@ -22,6 +22,14 @@ namespace SimpleDY
 
         void reconstructMomenta();
         std::string toString() const;
+        const BornEvent& getBornEvent() const { return m_bornEvent; }
+        const Emission& getEmission() const { return m_emission; }
+        const FourVector& getP1In() const { return m_p1In; }
+        const FourVector& getP2In() const { return m_p2In; }
+        const FourVector& getP1Out() const { return m_p1Out; }
+        const FourVector& getP2Out() const { return m_p2Out; }
+        const FourVector& getPBoson() const { return m_pBoson; }
+        const FourVector& getPGluon() const { return m_pGluon; }
 
     private:
         std::optional<double> _calculateBosonRapidity(double x1PreEm, double x2PreEm, double mT) const;

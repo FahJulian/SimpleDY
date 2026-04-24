@@ -21,8 +21,8 @@ namespace SimpleDY
         void sampleKinematics();
         void computeWeightAndSampleParton();
 
-        double getM() const { return m_mBoson; }
-        double getY() const { return m_yBoson; }
+        double getMBoson() const { return m_mBoson; }
+        double getYBoson() const { return m_yBoson; }
         double getS() const { return m_mBoson * m_mBoson; }
         double getX1() const { return m_x1; }
         double getX2() const { return m_x2; }
