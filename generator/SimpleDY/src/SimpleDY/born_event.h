@@ -41,7 +41,7 @@ namespace SimpleDY
         double m_mBoson = 0.0;
         double m_yBoson = 0.0;
         double m_phi = 0.0;
-        double m_cosTh = 0.0;
+        double m_cosTh = 0.0;   // The angle between the lepton and the quark, not between the lepton and leg 1!!
         double m_x1, m_x2;
         double m_dSigma = 0.0;
     };

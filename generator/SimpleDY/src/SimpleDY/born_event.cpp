@@ -9,7 +9,9 @@ namespace SimpleDY
 {
     namespace
     {
-        std::tuple<double, double> __neutralCurrentCouplings(bool upType, double mSq)
+        static const std::vector<int> __VALID_PARTONS_ON_LEG1 = { -5, -4, -3, -2, -1, 1, 2, 3, 4, 5 };
+
+        std::tuple<double, double> __neutralCurrentCouplingFactors(bool upType, double mSq)
         {
             // quark charge and axial and vector couplings
             double qQ = upType ? 2.0 / 3.0 : -1.0 / 3.0;
@@ -94,31 +96,23 @@ namespace SimpleDY
         double samplingPrefactor  = _computeInverseSamplingDensity();
 
         std::vector<std::tuple<int, double>> channels;
-        channels.reserve(10);
+        channels.reserve(__VALID_PARTONS_ON_LEG1.size());
         
-        for (int partonId = 1; partonId <= 5; partonId++)
+        for (int partonId : __VALID_PARTONS_ON_LEG1)
         {
-            // The luminosity factors if the quark is on leg 1 and the antiquark on leg 2
-            double f1  = m_process.getPdfs()->xfxQ2( partonId, m_x1, mSq) / m_x1;
-            double fb1 = m_process.getPdfs()->xfxQ2(-partonId, m_x2, mSq) / m_x2;
-            
-            // The luminosity factors if the quark is on leg 2 and the antiquark on leg 1
-            double f2  = m_process.getPdfs()->xfxQ2( partonId, m_x2, mSq) / m_x2;
-            double fb2 = m_process.getPdfs()->xfxQ2(-partonId, m_x1, mSq) / m_x1;
+            // Compute the luminosity factors
+            double f  = m_process.getPdfs()->xfxQ2( partonId, m_x1, mSq) / m_x1;
+            double fb = m_process.getPdfs()->xfxQ2(-partonId, m_x2, mSq) / m_x2;
 
-            // Compute the couplings 
-            bool upType = partonId % 2 == 0;
-            auto [c1, c2] = __neutralCurrentCouplings(upType, mSq);
+            // Compute the coupling factors
+            bool upType = std::abs(partonId) % 2 == 0;
+            auto [c1, c2] = __neutralCurrentCouplingFactors(upType, mSq);
 
-            // Compute the weight if the quark is in leg 1 or leg 2, respectively
-            double weight1 = f1 * fb1 * (c1 * (1.0 + m_cosTh * m_cosTh) + 2.0 * c2 * m_cosTh);
-            double weight2 = f2 * fb2 * (c1 * (1.0 + m_cosTh * m_cosTh) - 2.0 * c2 * m_cosTh);
+            // Compute the event weight
+            double weight = f * fb * (c1 * (1.0 + m_cosTh * m_cosTh) + 2.0 * c2 * m_cosTh);
 
-            // Store the two contributions to the differential cross section with 
-            // the respective id of the parton on leg 1
-            channels.push_back({  partonId, samplingPrefactor * physicsPrefactor * weight1 });
-            channels.push_back({ -partonId, samplingPrefactor * physicsPrefactor * weight2 });
-        }       
+            channels.push_back({ partonId, samplingPrefactor * physicsPrefactor * weight });
+        }
 
         return channels;
     }

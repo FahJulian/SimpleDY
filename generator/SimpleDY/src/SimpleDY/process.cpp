@@ -12,8 +12,8 @@ namespace SimpleDY
 {
     namespace 
     {
-        static constexpr int __N_TRIAL_EVENTS = 10e4;
-        static constexpr int __N_ACCEPTED_EVENTS = 10e3;
+        static constexpr int __N_TRIAL_EVENTS = 1e5;
+        static constexpr int __N_ACCEPTED_EVENTS = 1e4;
         static constexpr double __SECURITY_FACTOR = 1.1;
 
     } // namespace
@@ -38,6 +38,8 @@ namespace SimpleDY
             bornEvent.sampleKinematics();
             bornEvent.computeWeightAndSampleParton();
 
+            ASSERT(bornEvent.getDSigma() <= m_maxDSigma, "Born weight exceeds max weight");
+            
             // Unweight: Accept the event at the rate of it's weight over the reference weight
             double u = rand(0.0, 1.0);
             if (u < bornEvent.getDSigma() / m_maxDSigma)

@@ -44,7 +44,7 @@ namespace SimpleDY
             return prefactor * (1 + z * z) * pdfRatio;
         }
     }
-
+    
     Emission Emission::generateFirstEmission(const Process& process, const BornEvent& bornEvent)
     {
         // For each leg, sample one emission

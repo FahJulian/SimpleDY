@@ -15,25 +15,24 @@ namespace SimpleDY
 
     void Event::reconstructMomenta()
     {
+        // In the Born event, \cos(\theta) is the angle between the quark and the lepton. Here, 
+        // we need the angle between leg 1 and the lepton. Thus, if the quark is actually on 
+        // leg 2, we need to flip the sign of \cos(\theta).
+        double cosThLeg1 = m_bornEvent.getPartonId() > 0 ? m_bornEvent.getCosTh() : -m_bornEvent.getCosTh();
+
         double pT = std::sqrt(m_emission.getT());
         double mT = std::sqrt(m_bornEvent.getS() + m_emission.getT());
 
         double x1PreEm = m_bornEvent.getX1() / (m_emission.getLeg() == 1 ? m_emission.getZ() : 1.0);
         double x2PreEm = m_bornEvent.getX2() / (m_emission.getLeg() == 1 ? 1.0 : m_emission.getZ());
 
-        auto yBoson = _calculateBosonRapidity(x1PreEm, x2PreEm, mT);
-        if (!yBoson.has_value())
-        {
-            m_emission.reject();
-            reconstructMomenta();
-            return;
-        }
+        double yBoson = _solveBosonRapidityFromMasslessGluon(x1PreEm, x2PreEm, mT);
 
         m_pBoson = {
-            mT * std::cosh(yBoson.value()),
+            mT * std::cosh(yBoson),
             -pT * std::cos(m_emission.getPhi()),
             -pT * std::sin(m_emission.getPhi()),
-            mT * std::sinh(yBoson.value())
+            mT * std::sinh(yBoson)
         };
 
         m_p1In = {
@@ -51,13 +50,13 @@ namespace SimpleDY
         };
 
         double p = std::sqrt(m_bornEvent.getS()) / 2.0;
-        double sinTh = std::sqrt(1.0 - m_bornEvent.getCosTh() * m_bornEvent.getCosTh());
+        double sinTh = std::sqrt(1.0 - cosThLeg1 * cosThLeg1);
 
         FourVector p1Rest = {
             p,
             p * sinTh * std::cos(m_bornEvent.getPhi()),
             p * sinTh * std::sin(m_bornEvent.getPhi()),
-            p * m_bornEvent.getCosTh()
+            p * cosThLeg1
         };
 
         FourVector p2Rest = { p1Rest.e, -p1Rest.getThreeVec() };
@@ -79,7 +78,7 @@ namespace SimpleDY
             + std::to_string(pT);
     }
 
-    std::optional<double> Event::_calculateBosonRapidity(double x1PreEm, double x2PreEm, double mT) const
+    double Event::_solveBosonRapidityFromMasslessGluon(double x1PreEm, double x2PreEm, double mT) const
     {
         if (m_emission.isRejected())
             return m_bornEvent.getYBoson();
@@ -90,18 +89,24 @@ namespace SimpleDY
         double C = (a * b + m_bornEvent.getS()) / mT;
         double disc = C * C - 4.0 * a * b;
         
-        if (disc < 0) return { };   // unphysical kinematics, reject the emission
+        ASSERT(disc >= 0, "Unphysical kinematics");
 
         double sqrtDisc = std::sqrt(disc);
 
-        double u1 = (C + sqrtDisc) / (2.0 * b);
-        double u2 = (C - sqrtDisc) / (2.0 * b);
+        double uPlus = (C + sqrtDisc) / (2.0 * b);
+        double uMinus = (C - sqrtDisc) / (2.0 * b);
 
-        double y1 = std::log(u1);
-        double y2 = std::log(u2);
+        double yPlus = std::log(uPlus);
+        double yMinus = std::log(uMinus);
 
-        // pick the solution closer to the underlying Born rapidity
-        return (std::abs(y1 - m_bornEvent.getYBoson()) < std::abs(y2 - m_bornEvent.getYBoson())) ? y1 : y2;
+        double yReal = std::log(x1PreEm / x2PreEm) / 2.0;
+
+        // pick the solution for which the gluon moves in the same z-direction as the quark 
+        // it was emitted from (in the partonic COM frame)
+        if (m_emission.getLeg() == 1) 
+            return (yPlus < yReal) ? yPlus : yMinus;
+        else
+            return (yPlus > yReal) ? yPlus : yMinus;
     }
 
     bool Event::_hasValidKinematics() const

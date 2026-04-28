@@ -6,7 +6,6 @@
 #include "SimpleDY/four_vector.h"
 
 #include <string>
-#include <optional>
 
 namespace SimpleDY
 {
@@ -32,7 +31,7 @@ namespace SimpleDY
         const FourVector& getPGluon() const { return m_pGluon; }
 
     private:
-        std::optional<double> _calculateBosonRapidity(double x1PreEm, double x2PreEm, double mT) const;
+        double _solveBosonRapidityFromMasslessGluon(double x1PreEm, double x2PreEm, double mT) const;
         bool _hasValidKinematics() const;
 
     private:

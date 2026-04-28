@@ -49,22 +49,18 @@ namespace SimpleDY
                 << bornScale << " "
                 << Physics::ALPHA << " " << Physics::alphaSOneLoop(bornScale*bornScale, 5) << "\n";
 
-            int idLeg1 = event.getBornEvent().getPartonId();
-            if (hasGluon && event.getEmission().getLeg() == 2)
-                idLeg1 = -idLeg1;
-
             int color = 501;
             int anticolor = hasGluon ? 502 : 501;
 
-            if (idLeg1 > 0)     // quark on leg 1 
+            if (event.getBornEvent().getPartonId() > 0)     // quark on leg 1 
             {
-                __writeParticle(content,  idLeg1, -1, 0, 0, color, 0, event.getP1In());
-                __writeParticle(content, -idLeg1, -1, 0, 0, 0, anticolor, event.getP2In());
+                __writeParticle(content,  event.getBornEvent().getPartonId(), -1, 0, 0, color, 0, event.getP1In());
+                __writeParticle(content, -event.getBornEvent().getPartonId(), -1, 0, 0, 0, anticolor, event.getP2In());
             }
             else                // antiquark on leg 1
             {
-                __writeParticle(content,  idLeg1, -1, 0, 0, 0, anticolor, event.getP1In());
-                __writeParticle(content, -idLeg1, -1, 0, 0, color, 0, event.getP2In());
+                __writeParticle(content,  event.getBornEvent().getPartonId(), -1, 0, 0, 0, anticolor, event.getP1In());
+                __writeParticle(content, -event.getBornEvent().getPartonId(), -1, 0, 0, color, 0, event.getP2In());
             }
 
             __writeParticle(content, 13,  1, 1, 2, 0, 0, event.getP1Out());
